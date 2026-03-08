@@ -52,6 +52,7 @@ class SuspicionScorer:
         reference_df = pd.DataFrame({"title": title_list})
         self.similarity_engine.fit(reference_df, title_col="title")
 
+        # Entrenament exclou self-match
         X = self._build_features(title_list, exclude_self=True)
         self.classifier.fit(X, y_arr)
         self.classes_ = self.classifier.classes_
@@ -66,6 +67,7 @@ class SuspicionScorer:
     def predict_proba(self, titles: Iterable[str]) -> np.ndarray:
         self._check_fitted()
         title_list = [str(t) for t in titles]
+        # Inferencia no exclou self-match neighbors.
         X = self._build_features(title_list, exclude_self=False)
         return self.classifier.predict_proba(X)
 
