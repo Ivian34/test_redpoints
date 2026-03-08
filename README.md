@@ -102,11 +102,21 @@ Base URL por defecto: `http://127.0.0.1:8000`
 
 Estado de la API y existencia de artefactos.
 
-Devuelve:
+Entrada:
 
-- `status`: `"ok"` si la API está viva.
-- `stage1_model_path`, `stage2_model_path`, `similarity_model_path`, `reference_data_path`.
-- `*_exists` para cada artefacto (`true/false`).
+- Sin parámetros.
+
+Salida:
+
+- `status`: estado general del servicio (`"ok"`).
+- `stage1_model_path`: ruta del modelo Stage 1.
+- `stage1_model_exists`: indica si el archivo de Stage 1 existe.
+- `stage2_model_path`: ruta del modelo Stage 2.
+- `stage2_model_exists`: indica si el archivo de Stage 2 existe.
+- `similarity_model_path`: ruta del índice/modelo de similitud.
+- `similarity_model_exists`: indica si el índice/modelo de similitud existe.
+- `reference_data_path`: ruta del dataset de referencias.
+- `reference_data_exists`: indica si el dataset de referencias existe.
 
 ### `POST /analyze`
 
@@ -119,20 +129,27 @@ Body JSON:
 }
 ```
 
-Devuelve:
+Entrada:
 
-- `title`
-- `stage_1_ran`, `similarity_ran`, `stage_2_ran`
-- `is_asset`
-- `asset_score`
-- `suspicion_flag` (`null` si no corre stage 2)
-- `suspicion_score` (`null` si no corre stage 2)
-- `similarity_score` (score del mejor match)
-- `top_k`
-- `top_k_most_similar_reference_listings`: lista con:
-  - `reference_id`
-  - `reference_title`
-  - `similarity_score`
+- `title`: título del listing a evaluar.
+- `top_k`: número de referencias similares a devolver (1 a 50).
+
+Salida:
+
+- `title`: título procesado.
+- `stage_1_ran`: `true` si Stage 1 se ejecutó.
+- `similarity_ran`: `true` si el motor de similitud se ejecutó.
+- `stage_2_ran`: `true` solo si el listing fue clasificado como asset y Stage 2 se ejecutó.
+- `is_asset`: predicción binaria de Stage 1.
+- `asset_score`: probabilidad estimada de clase positiva (asset) en Stage 1.
+- `suspicion_flag`: predicción binaria de Stage 2 (`null` si no ejecuta Stage 2).
+- `suspicion_score`: probabilidad estimada de clase positiva (suspicious) en Stage 2 (`null` si no ejecuta Stage 2).
+- `similarity_score`: score del match más similar (`top1`).
+- `top_k`: valor de `top_k` usado en la consulta.
+- `top_k_most_similar_reference_listings`: lista de referencias similares.
+- `reference_id` (dentro de cada item): identificador interno de referencia.
+- `reference_title` (dentro de cada item): título de la referencia.
+- `similarity_score` (dentro de cada item): score de similitud de ese vecino.
 
 Errores típicos:
 
@@ -146,15 +163,29 @@ Query params:
 - `stage`: `1` o `2`
 - `threshold`: `0.0` a `1.0`
 
-Devuelve:
+Entrada:
 
-- Lista de registros analizados que pasan el umbral.
-- Cada item contiene:
-  - `id`, `created_at_utc`, `title`
-  - `stage_1_ran`, `stage_2_ran`, `similarity_ran`
-  - `is_asset`, `asset_score`
-  - `suspicion_flag`, `suspicion_score`
-  - `similarity_score`, `top_k`, `top_k_most_similar_reference_listings`
+- `stage`: define sobre qué score se filtra.
+- `threshold`: umbral mínimo del score del stage indicado.
+
+Salida:
+
+- Lista de registros analizados que cumplen el filtro.
+- Si `stage=1`, el filtro se aplica sobre `asset_score` para todos los listings.
+- Si `stage=2`, el filtro se aplica sobre `suspicion_score` y solo en listings asset.
+- `id`: identificador del registro en BD.
+- `created_at_utc`: timestamp UTC de análisis.
+- `title`: título analizado.
+- `stage_1_ran`: indica si Stage 1 corrió para ese registro.
+- `stage_2_ran`: indica si Stage 2 corrió para ese registro.
+- `similarity_ran`: indica si la consulta de similitud corrió.
+- `is_asset`: decisión binaria de Stage 1.
+- `asset_score`: score de Stage 1.
+- `suspicion_flag`: decisión binaria de Stage 2 o `null`.
+- `suspicion_score`: score de Stage 2 o `null`.
+- `similarity_score`: score top1 de similitud.
+- `top_k`: vecinos solicitados en ese análisis.
+- `top_k_most_similar_reference_listings`: vecinos almacenados para ese análisis.
 
 Errores típicos:
 
@@ -166,10 +197,14 @@ Query params:
 
 - `n`: `1` a `50`
 
-Devuelve:
+Entrada:
 
-- Lista de los últimos `n` registros analizados.
-- Estructura de cada registro igual que en `/analyzed-listings/by-threshold`.
+- `n`: cuántos registros recientes devolver.
+
+Salida:
+
+- Lista con los últimos `n` análisis guardados.
+- Estructura de cada item igual que en `/analyzed-listings/by-threshold`.
 
 Errores típicos:
 
@@ -181,17 +216,15 @@ Query params:
 
 - `stage`: `1` o `2`
 
-Devuelve el metadata del modelo del stage indicado, incluyendo:
+Entrada:
 
-- paths de modelo/embeddings del stage,
-- datos usados en entrenamiento/validación,
-- métricas globales y por clase (`precision`, `recall`, `f1`).
+- `stage`: stage cuyo metadata quieres consultar.
 
 Forma de respuesta:
 
 - `stage`: stage solicitado.
 - `metadata_path`: ruta del JSON cargado.
-- `metadata`: contenido completo del metadata del stage.
+- `metadata`: contenido completo del stage, incluyendo `artifacts`, `data` y `metrics`.
 
 Errores típicos:
 
