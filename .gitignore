@@ -1,0 +1,33 @@
+# OS / Editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Python cache / build
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.tox/
+.coverage
+.coverage.*
+htmlcov/
+build/
+dist/
+*.egg-info/
+
+# Virtualenvs / local env files
+.venv/
+venv/
+env/
+.env
+.env.*
+
+# Runtime / logs
+*.log
+
+# Local database
+src/storage/analyses.db

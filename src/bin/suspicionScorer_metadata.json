@@ -1,0 +1,69 @@
+{
+  "generated_at_utc": "2026-03-08T21:42:52.513777+00:00",
+  "artifacts": {
+    "suspicion_model_path": "/home/ivan/Documentos/test_redpoints/src/bin/suspicion_scorer_pipeline.joblib",
+    "suspicion_embedding_path": "/home/ivan/Documentos/test_redpoints/src/bin/suspicion_scorer_pipeline.joblib"
+  },
+  "suspicion_scorer": {
+    "data": {
+      "source_files": {
+        "results_tsv": "/home/ivan/Documentos/test_redpoints/src/data/Result_7.tsv",
+        "labels_tsv": "/home/ivan/Documentos/test_redpoints/src/data/labels.tsv"
+      },
+      "training_data_tsv": "/home/ivan/Documentos/test_redpoints/src/bin/suspicion_scorer_train_split.tsv",
+      "validation_data_tsv": "/home/ivan/Documentos/test_redpoints/src/bin/suspicion_scorer_validation_split.tsv",
+      "target_definition": "Use labels {7,5,9,10,15,16}; suspicion_target = (label_id != 7).astype(int)",
+      "split_config": {
+        "method": "train_test_split",
+        "test_size": 0.2,
+        "random_state": 42,
+        "stratify": true
+      },
+      "train_rows": 4873,
+      "validation_rows": 1219,
+      "train_positive_rows": 3804,
+      "train_negative_rows": 1069,
+      "validation_positive_rows": 951,
+      "validation_negative_rows": 268
+    },
+    "metrics": {
+      "precision": 0.9705561613958561,
+      "recall": 0.935856992639327,
+      "f1": 0.9528907922912205,
+      "confusion_matrix": {
+        "labels": [
+          0,
+          1
+        ],
+        "matrix": [
+          [
+            241,
+            27
+          ],
+          [
+            61,
+            890
+          ]
+        ],
+        "tn": 241,
+        "fp": 27,
+        "fn": 61,
+        "tp": 890
+      },
+      "per_class": {
+        "class_0": {
+          "precision": 0.7980132450331126,
+          "recall": 0.8992537313432836,
+          "f1": 0.8456140350877193,
+          "support": 268
+        },
+        "class_1": {
+          "precision": 0.9705561613958561,
+          "recall": 0.935856992639327,
+          "f1": 0.9528907922912205,
+          "support": 951
+        }
+      }
+    }
+  }
+}
